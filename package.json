@@ -1,0 +1,41 @@
+{
+  "name": "crescendo-hack",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.2",
+    "cookie-parser": "~1.4.3",
+    "cors": "^2.8.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "fabric": "^2.2.2",
+    "http-errors": "~1.6.2",
+    "mongoose": "^5.0.11",
+    "mongoose-paginate": "^5.0.3",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.17.2",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "pikaday": "^1.7.0",
+    "serve-favicon": "^2.4.5"
+  },
+  "description": "",
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshua-noronha13/CrescendoHack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshua-noronha13/CrescendoHack/issues"
+  },
+  "homepage": "https://github.com/joshua-noronha13/CrescendoHack#readme"
+}
