@@ -35,11 +35,6 @@ app.get("/councils",function(req,res){
 	res.render("councils")
 })
 
-app.get("/councils",function(req,res){
-	// res.send("HElp")
-	res.render("councils")
-})
-
 app.get("/events",function(req,res){
 	// res.send("HElp")
 	res.render("events")
@@ -47,12 +42,17 @@ app.get("/events",function(req,res){
 
 app.get("/login",function(req,res){
 	// res.send("HElp")
-	res.render("councils")
+	res.render("login")
 })
 
 app.get("/signup",function(req,res){
 	// res.send("HElp")
-	res.render("councils")
+	res.render("signup")
+})
+
+app.get("/event_details",function(req,res){
+	// res.send("HElp")
+	res.render("event_expanded")
 })
 
 
