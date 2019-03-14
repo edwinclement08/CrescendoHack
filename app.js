@@ -23,19 +23,38 @@ app.set("view engine","ejs");
 // app.use(cookieParser());
 
 
-setTimeout(() => {mongoose.connect('mongodb://mongo/myappdatabase')}, 1000)
+setTimeout(() => {mongoose.connect('mongodb://mongo/CrescendoHack')}, 1000)
 // app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 // app.use(methodOverride("_method"));
 
-app.get("/",function(req,res){
-	res.render("index")
+
+app.get("/councils",function(req,res){
+	// res.send("HElp")
+	res.render("councils")
 })
 
-app.get("/council",function(req,res){
-	res.render("council")
+app.get("/councils",function(req,res){
+	// res.send("HElp")
+	res.render("councils")
 })
+
+app.get("/events",function(req,res){
+	// res.send("HElp")
+	res.render("events")
+})
+
+app.get("/login",function(req,res){
+	// res.send("HElp")
+	res.render("councils")
+})
+
+app.get("/signup",function(req,res){
+	// res.send("HElp")
+	res.render("councils")
+})
+
 
 app.get("/review",function(req,res){
 	res.render("review")
@@ -44,6 +63,11 @@ app.get("/review",function(req,res){
 app.get("/",function(req,res){
 	res.render("index")
 })
+
+app.get("*",function(req,res){
+	res.send("<h1>404 Page Not Found<h1>");
+});
+
 app.listen(3000, function () {
   console.log('Ready');
 });
