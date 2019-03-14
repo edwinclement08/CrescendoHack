@@ -215,6 +215,9 @@ app.get("/logout", function (req, res) {
 
 	res.redirect("/");
 });
+app.get("/points",function(req,res){
+	res.render("points")
+})
 app.get("*", function (req, res) {
 	res.send("<h1>404 Page Not Found<h1>");
 });
