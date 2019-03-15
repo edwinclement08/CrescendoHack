@@ -10,6 +10,7 @@ var express = require("express"),
 	// passportGoogle = require('passport-google-oauth').OAuth2Strategy,
 	// configAuth = require("./auth.js"),
 	User = require("./model/student.js"),
+	Event = require("./model/event.js"),
 	// Comment = require("./model/comments.js"),
 	// Pet = require("./model/pet.js"),
 	// Story = require("./model/story.js"),
@@ -17,7 +18,7 @@ var express = require("express"),
 	session = require("express-session");
 // methodOverride = require("method-override");
 setTimeout(() => { mongoose.connect('mongodb://mongo/CrescendoHack') }, 1000)
-
+classes = { "BE Comps": 0, "BE Elex": 0, "BE IT": 0, "BE Prod": 0 }
 app.use(methodOverride("_method"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -97,42 +98,37 @@ passport.use('local-login', new passportLocal({
 	passReqToCallback: true // allows us to pass back the entire request to the callback
 },
 	function (req, username, password, done) { // callback with email and password from our form
-		console.log("Reached"+username+password)
+		// console.log("Reached"+username+password)
 		// find a user whose email is the same as the forms email
 		// we are checking to see if the user trying to login already exists
 		User.findOne({ 'username': username }, function (err, user) {
 			// if there are any errors, return the error before anything else
-		// console.log("Could have found 1")			
-			if (err)
-			{
+			// console.log("Could have found 1")			
+			if (err) {
 				console.log(err)
 				return done(err);
 			}
 
 			// if no user is found, return the message
-			if (!user)
-			{
+			if (!user) {
 				console.log("No user")
 				return done(null, false, req.flash('error', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
 			}
 
 			// if the user is found but the password is wrong
 			console.log(password)
-			if (!user.validPassword(password))
-			{
+			if (!user.validPassword(password)) {
 				// Console.log("Bad pass")
 				return done(null, false, req.flash('error', 'Invalid password.')); // create the loginMessage and save it to session as flashdata
 			}
 			// console.log("SHIT")
 			// all is well, return successful user
 			console.log(user.council)
-			if (user.council)
-			{
+			if (user.council) {
 				console.log("In here")
 				app.locals.council = user.council;
 			}
-			if (user.admin)
-			{
+			if (user.admin) {
 				app.locals.admin = user.admin;
 			}
 			app.locals.username = username
@@ -148,7 +144,7 @@ passport.deserializeUser(function (id, done) {
 		done(err, user);
 	});
 });
-app.use(function(req,res,next){
+app.use(function (req, res, next) {
 	res.locals.currentUser = req.user;
 	res.locals.error = req.flash("error");
 	res.locals.sucess = req.flash("sucess");
@@ -156,7 +152,25 @@ app.use(function(req,res,next){
 });
 
 // app.use(cors());
+app.get("/points", function (req, res) {
+	User.find({}, function (err, foundUsers) {
+		if (!err) {
+			for (j = 0; j < foundUsers.length; j++) {
+				for (i = 0; i < classes.length; i++) {
+					res.render("events", { user: foundUsers });
+				}
+			}
 
+		}
+		else {
+			console.log(err);
+			req.flash("error", "Please try again after some time ");
+			res.redirect("/");
+		}
+
+	});
+	res.render("points")
+})
 
 
 app.get("/councils", function (req, res) {
@@ -164,9 +178,35 @@ app.get("/councils", function (req, res) {
 	res.render("councils")
 })
 
+app.get("/events/:id", function (req, res) {
+	Event.findById(req.params.id, (err, foundEvent) => {
+		if (err) {
+			console.log(err);
+			req.flash("error", "Please try again after some time");
+			return res.redirect("back");
+		} else {
+			console.log(foundEvent);
+			res.render("event_points")
+		}
+	}
+	);
+});
+
 app.get("/events", function (req, res) {
 	// res.send("HElp")
-	res.render("events")
+	// Event.find({}, function(a,b){console.log(b)})
+	Event.find({}, function (err, stories) {
+		if (!err) {
+			console.log(stories)
+			res.render("events", { stories: stories, title: "Pet Shop" });
+		}
+		else {
+			console.log(err);
+			req.flash("error", "Please try again after some time ");
+			res.redirect("/");
+		}
+
+	});
 })
 
 app.get("/login", function (req, res) {
@@ -189,9 +229,6 @@ app.get("/review", function (req, res) {
 	res.render("review")
 })
 
-app.get("/", function (req, res) {
-	res.render("index")
-})
 
 
 app.post('/signup', passport.authenticate('local-signup', {
@@ -215,8 +252,10 @@ app.get("/logout", function (req, res) {
 
 	res.redirect("/");
 });
-app.get("/points",function(req,res){
-	res.render("points")
+
+
+app.get("/", function (req, res) {
+	res.render("index")
 })
 app.get("*", function (req, res) {
 	res.send("<h1>404 Page Not Found<h1>");
