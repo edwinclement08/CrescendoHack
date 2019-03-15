@@ -182,23 +182,22 @@ app.get("/councils", function (req, res) {
 	// res.send("HElp")
 	res.render("councils")
 })
-
+event_list = []
 app.get("/events/:id", function (req, res) {
 	event_list = []
+	thisevent = null;
 	Event.findById(req.params.id, (err, foundEvent) => {
 		if (err) {
 			console.log(err);
 			req.flash("error", "Please try again after some time");
 			return res.redirect("back");
 		} else {
-			console.log(foundEvent.user[0].id);
-			User.findById(foundEvent.user[0].id, function(err, user) {
-				if (!err)
-				{
-					event_list.push(user)
-				}
-			});
-			res.render("event_points")
+			console.log(foundEvent.user.username[0]);
+			console.log(foundEvent.user.username[1]);
+			thisevent = foundEvent; 
+			event_list.push({username:foundEvent.user.username,points:foundEvent.user.points})
+			console.log(JSON.stringify(event_list))
+			res.render("event_points",{event:thisevent,event_list:event_list})
 		}
 	}
 	);
@@ -210,7 +209,7 @@ app.get("/events", function (req, res) {
 	Event.find({}, function (err, stories) {
 		if (!err) {
 			console.log(stories)
-			res.render("events", { stories: stories, title: "Pet Shop" });
+			res.render("events", { stories: stories });
 		}
 		else {
 			console.log(err);
