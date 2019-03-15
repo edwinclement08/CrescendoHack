@@ -11,6 +11,7 @@ var event = new mongoose.Schema({
     prize: Number,
     cost: Number,
     room: String,
+    categories: [],
     date: Date,
     floor: Number,
     time: String,

@@ -18,7 +18,7 @@ var express = require("express"),
 	session = require("express-session");
 // methodOverride = require("method-override");
 setTimeout(() => { mongoose.connect('mongodb://mongo/CrescendoHack') }, 1000)
-classes = { "BE Comps": 0, "BE Elex": 0, "BE IT": 0, "BE Prod": 0 }
+classes = { "BE Comps": 0, "BE Elex": 0, "BE IT": 0, "BE Prod": 0, length: 4 }
 app.use(methodOverride("_method"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -155,12 +155,18 @@ app.use(function (req, res, next) {
 app.get("/points", function (req, res) {
 	User.find({}, function (err, foundUsers) {
 		if (!err) {
+			// console.log(foundUsers)
 			for (j = 0; j < foundUsers.length; j++) {
 				for (i = 0; i < classes.length; i++) {
-					res.render("events", { user: foundUsers });
+					if (foundUsers[j].class) {
+						// console.log(foundUsers)
+						if (foundUsers[j].points)
+							classes[foundUsers[j].class] += foundUsers[j].points
+					}
 				}
 			}
-
+			// console.log(foundUsers)
+			res.render("points", { classes: classes })
 		}
 		else {
 			console.log(err);
@@ -169,7 +175,6 @@ app.get("/points", function (req, res) {
 		}
 
 	});
-	res.render("points")
 })
 
 
@@ -179,13 +184,20 @@ app.get("/councils", function (req, res) {
 })
 
 app.get("/events/:id", function (req, res) {
+	event_list = []
 	Event.findById(req.params.id, (err, foundEvent) => {
 		if (err) {
 			console.log(err);
 			req.flash("error", "Please try again after some time");
 			return res.redirect("back");
 		} else {
-			console.log(foundEvent);
+			console.log(foundEvent.user[0].id);
+			User.findById(foundEvent.user[0].id, function(err, user) {
+				if (!err)
+				{
+					event_list.push(user)
+				}
+			});
 			res.render("event_points")
 		}
 	}
