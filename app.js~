@@ -35,20 +35,20 @@ app.locals.council = null;
 app.locals.admin = null;
 
 
-//let user1 = new user("John",20,["cultural","seminars"]);
+let user1 = new user("John",20,["cultural","seminars"]);
 
 let event_List = []
 
-//let u = new event("blind coding","good event",["cultural","seminars"])
-//event_List.push(u)
-//u = new event("algoholic","good event",["cultural","fun"])
-//event_List.push(u)
-//u = new event("code swapping","good event",["cultural","workshop"])
-//event_List.push(u)
-//u = new event("CAD wars","good event",["technical","seminars"])
-//event_List.push(u)
-//u = new event("project competition","good event",["cultural","arts","fun"])
-//event_List.push(u)
+let u = new event("blind coding","good event",["cultural","seminars"])
+event_List.push(u)
+u = new event("algoholic","good event",["cultural","fun"])
+event_List.push(u)
+u = new event("code swapping","good event",["cultural","workshop"])
+event_List.push(u)
+u = new event("CAD wars","good event",["technical","seminars"])
+event_List.push(u)
+u = new event("project competition","good event",["cultural","arts","fun"])
+event_List.push(u)
 
 
 app.use(flash());
@@ -220,7 +220,7 @@ app.get("/events/:id", function (req, res) {
 	);
 });
 
-app.get("/add_bill", function (req, res) {
+app.get("/events", function (req, res) {
 	// res.send("HElp")
 	// Event.find({}, function(a,b){console.log(b)})
 	Event.find({}, function (err, stories) {
