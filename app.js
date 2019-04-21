@@ -11,6 +11,7 @@ var express = require("express"),
 	// configAuth = require("./auth.js"),
 	User = require("./model/student.js"),
 	Event = require("./model/event.js"),
+	Bill = require("./model/bill.js"),
 	// Comment = require("./model/comments.js"),
 	// Pet = require("./model/pet.js"),
 	// Story = require("./model/story.js"),
@@ -18,7 +19,7 @@ var express = require("express"),
 	session = require("express-session");
 // methodOverride = require("method-override");
 setTimeout(() => { mongoose.connect('mongodb://mongo/CrescendoHack') }, 1000)
-classes = { "BE Comps": 0, "BE Elex": 0, "BE IT": 0, "BE Prod": 0, length: 4 }
+
 app.use(methodOverride("_method"));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,28 +28,16 @@ app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 // app.use(cookieParser());
 app.use(session({
-	secret: "JoshuaEdwinAkash",
+	secret: "JoshuaNoronha",
 	resave: false,
 	saveUninitialized: false
 }));
 app.locals.council = null;
 app.locals.admin = null;
 
-
-//let user1 = new user("John",20,["cultural","seminars"]);
-
+app.locals.amount = 0
 let event_List = []
 
-//let u = new event("blind coding","good event",["cultural","seminars"])
-//event_List.push(u)
-//u = new event("algoholic","good event",["cultural","fun"])
-//event_List.push(u)
-//u = new event("code swapping","good event",["cultural","workshop"])
-//event_List.push(u)
-//u = new event("CAD wars","good event",["technical","seminars"])
-//event_List.push(u)
-//u = new event("project competition","good event",["cultural","arts","fun"])
-//event_List.push(u)
 
 
 app.use(flash());
@@ -67,13 +56,13 @@ passport.use('local-signup', new passportLocal({  // by default, local strategy 
 			User.findOne({ 'local.username': username }, function (err, user) {
 				// if there are any errors, return the error
 				if (err) {
-					console.log("Super Screwed")
+					console.log("Problem in the database/username")
 					return done(err);
 				}
 
 				// check to see if theres already a user with that email
 				if (user) {
-					console.log("Screwed")
+					console.log("User exists")
 					return done(null, false, req.flash('error', 'That username is already taken.'));
 				} else {
 
@@ -91,12 +80,12 @@ passport.use('local-signup', new passportLocal({  // by default, local strategy 
 					// save the user
 					newUser.save(function (err) {
 						if (err) {
-							console.log("Screwed")
+							console.log("Error in saving new user")
 							throw err;
 						}
 						console.log("Registered new User")
 						app.locals.username = username
-						return done(null, newUser, req.flash("sucess", "Welcome to CRCE,you have been registered sucessfully"));
+						return done(null, newUser, req.flash("sucess", "You have been registered sucessfully"));
 					});
 				}
 
@@ -169,34 +158,33 @@ app.use(function (req, res, next) {
 });
 
 // app.use(cors());
-app.get("/points", function (req, res) {
-	User.find({}, function (err, foundUsers) {
-		if (!err) {
-			// console.log(foundUsers)
-			for (j = 0; j < foundUsers.length; j++) {
-				for (i = 0; i < classes.length; i++) {
-					if (foundUsers[j].class) {
-						// console.log(foundUsers)
-						if (foundUsers[j].points)
-							classes[foundUsers[j].class] += foundUsers[j].points
-					}
-				}
-			}
-			// console.log(foundUsers)
-			res.render("points", { classes: classes })
-		}
-		else {
-			console.log(err);
-			req.flash("error", "Please try again after some time ");
-			res.redirect("/");
-		}
+// app.get("/points", function (req, res) {
+// 	User.find({}, function (err, foundUsers) {
+// 		if (!err) {
+// 			// console.log(foundUsers)
+// 			for (j = 0; j < foundUsers.length; j++) {
+// 				for (i = 0; i < classes.length; i++) {
+// 					if (foundUsers[j].class) {
+// 						// console.log(foundUsers)
+// 						if (foundUsers[j].points)
+// 							classes[foundUsers[j].class] += foundUsers[j].points
+// 					}
+// 				}
+// 			}
+// 			// console.log(foundUsers)
+// 			res.render("points", { classes: classes })
+// 		}
+// 		else {
+// 			console.log(err);
+// 			req.flash("error", "Please try again after some time ");
+// 			res.redirect("/");
+// 		}
 
-	});
-})
+// 	});
+// })
 
 
 app.get("/councils", function (req, res) {
-	// res.send("HElp")
 	res.render("councils")
 })
 event_list = []
@@ -211,10 +199,10 @@ app.get("/events/:id", function (req, res) {
 		} else {
 			console.log(foundEvent.user.username[0]);
 			console.log(foundEvent.user.username[1]);
-			thisevent = foundEvent; 
-			event_list.push({username:foundEvent.user.username,points:foundEvent.user.points})
+			thisevent = foundEvent;
+			event_list.push({ username: foundEvent.user.username, points: foundEvent.user.points })
 			console.log(JSON.stringify(event_list))
-			res.render("event_points",{event:thisevent,event_list:event_list})
+			res.render("event_points", { event: thisevent, event_list: event_list })
 		}
 	}
 	);
@@ -226,15 +214,37 @@ app.get("/add_bill", function (req, res) {
 	Event.find({}, function (err, stories) {
 		if (!err) {
 			console.log(stories)
-			res.render("events", { stories: stories });
+			res.render("add_bill", { stories: stories });
 		}
 		else {
 			console.log(err);
 			req.flash("error", "Please try again after some time ");
 			res.redirect("/");
 		}
-
+		
 	});
+})
+app.post("/add_bill", function (req, res) {
+	console.log("Reached here")
+	billDetails = req.body
+	console.log(billDetails)
+	var newBill = new Bill()
+	newBill.purpose = billDetails.purpose
+	newBill.amount = billDetails.amount
+	newBill.members = billDetails.billItemList
+	newBill.save(function (err) {
+		if (err) {
+			console.log("Error in saving new user")
+			res.send(err);
+		}
+		console.log("Registered new User")
+		res.redirect("/")
+	})
+	len = 0
+	if (billDetails.billItemList && billDetails.billItemList.length)
+		len = billDetails.billItemList.length
+	userAmount = billDetails.amount/(len+1)
+	app.locals.amount = userAmount
 })
 
 app.get("/login", function (req, res) {
@@ -296,92 +306,85 @@ app.listen(3000, function () {
 module.exports = app;
 
 
-class user{
-   
-    constructor(name,age,categories){
-        this.name = name;
-        this.age = age;
-        this.categories = []
-        this.categories = categories;
-        this.events = [];
-    }
+class user {
 
-    add_users(events){
-        this.events = events;
-    }
+	constructor(name, age, categories) {
+		this.name = name;
+		this.age = age;
+		this.categories = []
+		this.categories = categories;
+		this.events = [];
+	}
+
+	add_users(events) {
+		this.events = events;
+	}
 }
 
-class event{
-   
-    constructor(name,details,categories){
-        this.name = name;
-        this.details = details;
-        this.categories = []
-        this.categories = categories;
-    }
+class event {
+
+	constructor(name, details, categories) {
+		this.name = name;
+		this.details = details;
+		this.categories = []
+		this.categories = categories;
+	}
 }
 
 function common_elements(arrs) {
-    var resArr = [];
-    for (var i = arrs[0].length - 1; i > 0; i--)
-    {
-        for (var j = arrs.length - 1; j > 0; j--)
-         {
-            if (arrs[j].indexOf(arrs[0][i]) == -1)
-             {
-                break;
-            }
-        }
-        if (j === 0)
-        {
-            resArr.push(arrs[0][i]);
-        }
-    }
-    return resArr;
+	var resArr = [];
+	for (var i = arrs[0].length - 1; i > 0; i--) {
+		for (var j = arrs.length - 1; j > 0; j--) {
+			if (arrs[j].indexOf(arrs[0][i]) == -1) {
+				break;
+			}
+		}
+		if (j === 0) {
+			resArr.push(arrs[0][i]);
+		}
+	}
+	return resArr;
 }
 
-function sortProperties(obj)
-{
-  // convert object into array
-    var sortable=[];
-    for(var key in obj)
-        if(obj.hasOwnProperty(key))
-            sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-   
-    // sort items by value
-    sortable.sort(function(a, b)
-    {
-        var x=a[1],
-            y=b[1];
-        return x>y ? -1 : x<y ? 1 : 0;
-    });
-    return sortable; // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+function sortProperties(obj) {
+	// convert object into array
+	var sortable = [];
+	for (var key in obj)
+		if (obj.hasOwnProperty(key))
+			sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+
+	// sort items by value
+	sortable.sort(function (a, b) {
+		var x = a[1],
+			y = b[1];
+		return x > y ? -1 : x < y ? 1 : 0;
+	});
+	return sortable; // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
 }
 
 var recommend_items = {};
 
-for(var i = 0, size = event_List.length; i < size ; i++)
-{
-    var event_num = event_List[i];
-    var user_cat = user1.categories
-    //console.log(user.categories )
-    var x = user_cat.length; //only change this accordingly this is
-    var y = event_num.categories.length;
-    var total = x + y;
-    var arrays = [user1.categories,event_num.categories];
-    var sim =  common_elements(arrays);
-    var sim_elements = sim.length;
-    total = total - sim_elements;
-    var corelation = sim_elements/total;
+for (var i = 0, size = event_List.length; i < size; i++) {
+	var event_num = event_List[i];
+	var user_cat = user1.categories
+	//console.log(user.categories )
+	var x = user_cat.length; //only change this accordingly this is
+	var y = event_num.categories.length;
+	var total = x + y;
+	var arrays = [user1.categories, event_num.categories];
+	var sim = common_elements(arrays);
+	var sim_elements = sim.length;
+	total = total - sim_elements;
+	var corelation = sim_elements / total;
 
-    recommend_items[event_num.name] = corelation;
-    console.log(event_num.name + ": " +corelation);
- }
- 
- var sorted_recommend = sortProperties(recommend_items)
- for (var key in sorted_recommend) {
-    // check if the property/key is defined in the object itself, not in parent
-    if (sorted_recommend.hasOwnProperty(key)) {          
-        console.log(key, sorted_recommend[key]);
-    }
+	recommend_items[event_num.name] = corelation;
+	console.log(event_num.name + ": " + corelation);
+}
+
+var sorted_recommend = sortProperties(recommend_items)
+for (var key in sorted_recommend) {
+	// check if the property/key is defined in the object itself, not in parent
+	if (sorted_recommend.hasOwnProperty(key)) {
+		console.log(key, sorted_recommend[key]);
+	}
 }

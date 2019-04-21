@@ -1,0 +1,84 @@
+<%- include partials/header.ejs %>
+<script>
+    billItemList = []
+    function addPerson() {
+        var name = document.getElementById("name").value;
+        billItemList.push(name)
+        console.log(billItemList)
+        output = ""
+        for (i = 0; i < billItemList.length; i++) {
+            output += "<h4 style='color:white'>" + billItemList[i] + "</h4>" +
+            "<input type='hidden' name='billItemList[]' value="+billItemList[i]+" />"
+        }
+
+        document.getElementById("manipulate").innerHTML = output;
+    }
+    function fileSelectedChanged(obj) {
+        var filePath = obj.value;
+
+        var ext = filePath.substring(filePath.lastIndexOf('.') + 1).toLowerCase();
+        if (ext != 'csv') {
+            alert('Only files with the file extension CSV are allowed');
+        } else {
+            document.getElementById('form1').submit();
+        }
+    }
+</script>
+<style>
+    
+
+</style>
+<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner"
+    style="background-image:url(images/img_bg_1.jpg); height: 100vh; margin-top: 2vh">
+    <div class="overlay"></div>
+    <div class="fh5co-container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+                <div class="display-t">
+                    <div class="display-tc animate-box" data-animate-effect="fadeIn">
+                        <h1>Add Bill</h1>
+                        <div class="row animate-box">
+                            <div class="col-md-10 col-md-offset-1">
+                                <form class="form-inline" method="POST" action="/add_bill">
+                                    <div class="col-md-12 col-sm-12" style="margin:5px">
+                                        <div class="form-group">
+                                            <label for="purpose" class="sr-only">Purpose</label>
+                                            <input type="text" class="form-control" id="purpose" name="purpose"
+                                                placeholder="Purpose" style="width:50vw" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 col-sm-12" style="margin:5px">
+                                        <div class="form-group">
+                                            <label for="amount" class="sr-only">Amount</label>
+                                            <input type="number" class="form-control" id="amount" name="amount"
+                                                placeholder="Amount" style="width:50vw" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12 col-sm-12" id="manipulate">
+                                    </div>
+
+                                    <div class="col-md-12 col-sm-12" style="margin:5px">
+                                        <input type="text" name="name" id="name">
+                                        <input type="button" value="+ Add Person" onclick="addPerson()">
+                                    </div>
+                                    <div class="col-sm-12" style="margin:5px">
+                                        
+                                        <input type="file" name="bill" id="bill" accept="image/*" placeholder="Add Image of Bill" style="width:27.5vw; align-content: center;margin-left: 12vw">
+                                    </div>
+                                    <div class="col-md-12 col-sm-12">
+                                        <button type="submit" class="btn btn-default btn-block"
+                                            style="background-color: blueviolet;margin:5px">Confirm</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<%- include partials/footer.ejs %>
