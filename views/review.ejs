@@ -8,7 +8,7 @@
 			<div class="col-md-8 col-md-offset-2 text-center">
 				<div class="display-t">
 					<div class="display-tc animate-box" data-animate-effect="fadeIn">
-						<h1>Event Review</h1>
+						<h1>Bill Status</h1>
 						<h2></h2>
 					</div>
 				</div>
@@ -16,155 +16,25 @@
 		</div>
 	</div>
 </header>
-<div id="fh5co-gallery">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-8 col-md-offset-2 text-center fh5co-heading animate-box">
-				<!-- <span>Our Memories</span> -->
-				<h2>Events for Crescendo 2019</h2>
-				<p>Following are the events to be reviewed</p>
-			</div>
-			<div class="row">
-				<div class="btn-group btn-group-toggle col-md-offset-4 col-md-4 animate-box text-center" data-toggle="buttons">
-					<label class="btn btn-secondary active" style="width:11em">
-						<input type="radio" name="options" id="option1" autocomplete="off" checked>Not Passed
-					</label>
-					<label class="btn btn-secondary" style="width:11em">
-						<input type="radio" name="options" id="option2" autocomplete="off">Completed
-					</label>
-				</div>
-			</div>
-		</div>
-		<br>
-		<br>
-		<div class="row row-bottom-padded-md">
-			<div class="col-md-12">
-				<ul id="fh5co-gallery-list">
+<br>
+<% if (billList) {
+	for (var i=0;i<billList.length;i++) {%>
+<div class="list-group">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2 fh5co-heading animate-box" style="border:0.001em rgba(0, 0, 0, 0.2) solid">
 
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-1.jpg); ">
-						<a href="/event_details">
-							<div class="case-studies-summary">
-								<h2>Escape Room</h2>
-								<span>TEDx CRCE</span>
-							</div>
-						</a>
-					</li>
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-2.jpg); ">
-						<a href="#" class="color-2">
-							<div class="case-studies-summary">
-								<h2>Idea Competition</h2>
-								<span>E-Cell CRCE</span>
-							</div>
-						</a>
-					</li>
-
-
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-3.jpg); ">
-						<a href="/event_details" class="color-3">
-							<div class="case-studies-summary">
-								<h2>ABC</h2>
-								<span>Design Competition</span>
-							</div>
-						</a>
-					</li>
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-4.jpg); ">
-						<a href="#" class="color-4">
-							<div class="case-studies-summary">
-								<span>Crack The</span>
-								<h2>Company's Conference Room</h2>
-							</div>
-						</a>
-					</li>
-
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-5.jpg); ">
-						<a href="#" class="color-3">
-							<div class="case-studies-summary">
-								<span>50 Photos</span>
-								<h2>Useful baskets</h2>
-							</div>
-						</a>
-					</li>
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-6.jpg); ">
-						<a href="#" class="color-4">
-							<div class="case-studies-summary">
-								<span>45 Photos</span>
-								<h2>Skater man in the road</h2>
-							</div>
-						</a>
-					</li>
-
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-7.jpg); ">
-						<a href="#" class="color-4">
-							<div class="case-studies-summary">
-								<span>35 Photos</span>
-								<h2>Two Glass of Juice</h2>
-							</div>
-						</a>
-					</li>
-
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-8.jpg); ">
-						<a href="#" class="color-5">
-							<div class="case-studies-summary">
-								<span>90 Photos</span>
-								<h2>Timer starts now!</h2>
-							</div>
-						</a>
-					</li>
-					<li class="one-third animate-box" data-animate-effect="fadeIn"
-						style="background-image: url(images/gallery-9.jpg); ">
-						<a href="#" class="color-6">
-							<div class="case-studies-summary">
-								<span>56 Photos</span>
-								<h2>Beautiful sunset</h2>
-							</div>
-						</a>
-					</li>
-				</ul>
-			</div>
+			<h3 style="margin-top:1em">Purpose : <%= billList[i].purpose %></h3>
+			<p>No of People :<%= billList[i].members.length %></p>
+			<p>Amount : <%= billList[i].amount %></p>
+			<p><%if (!billList[i].setelled) {%>
+				<input type="button" class="btn btn-defailt" style="color:blueviolet" value="Pay Dues">
+				<%}%>
+			</p>
 		</div>
 	</div>
 </div>
-
-<div id="fh5co-started" class="fh5co-bg" style="background-image:url(images/img_bg_4.jpg);">
-	<div class="overlay"></div>
-	<div class="container">
-		<div class="row animate-box">
-			<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
-				<h2>Are You Attending?</h2>
-				<p>Please Fill-up the form to notify you that you're attending. Thanks.</p>
-			</div>
-		</div>
-		<div class="row animate-box">
-			<div class="col-md-10 col-md-offset-1">
-				<form class="form-inline">
-					<div class="col-md-4 col-sm-4">
-						<div class="form-group">
-							<label for="name" class="sr-only">Name</label>
-							<input type="name" class="form-control" id="name" placeholder="Name">
-						</div>
-					</div>
-					<div class="col-md-4 col-sm-4">
-						<div class="form-group">
-							<label for="email" class="sr-only">Email</label>
-							<input type="email" class="form-control" id="email" placeholder="Email">
-						</div>
-					</div>
-					<div class="col-md-4 col-sm-4">
-						<button type="submit" class="btn btn-default btn-block" style="background-color: blueviolet;">I
-							am Attending</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
+<% }} %>
+<br>
+<br>
 
 <%- include partials/footer.ejs %>

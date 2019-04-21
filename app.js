@@ -2,22 +2,19 @@ var express = require("express"),
 	bodyParser = require("body-parser"),
 	mongoose = require("mongoose"),
 	app = express(),
+	fs = require("fs"),
+	csv = require("csv"),
+	parse = require('csv-parse'),
 	methodOverride = require("method-override"),
 	flash = require("connect-flash-plus"),
 	passport = require("passport"),
+	formidable = require('formidable'),
 	passportLocal = require("passport-local").Strategy,
 	// passportFacebook = require("passport-facebook").Strategy,
 	// passportGoogle = require('passport-google-oauth').OAuth2Strategy,
-	// configAuth = require("./auth.js"),
-	User = require("./model/student.js"),
-	Event = require("./model/event.js"),
+	User = require("./model/user.js"),
 	Bill = require("./model/bill.js"),
-	// Comment = require("./model/comments.js"),
-	// Pet = require("./model/pet.js"),
-	// Story = require("./model/story.js"),
-	// seedDB = require('./seedDB'),
 	session = require("express-session");
-// methodOverride = require("method-override");
 setTimeout(() => { mongoose.connect('mongodb://mongo/CrescendoHack') }, 1000)
 
 app.use(methodOverride("_method"));
@@ -26,7 +23,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
-// app.use(cookieParser());
 app.use(session({
 	secret: "JoshuaNoronha",
 	resave: false,
@@ -34,11 +30,27 @@ app.use(session({
 }));
 app.locals.council = null;
 app.locals.admin = null;
+var multer = require('multer');
+var upload = multer();
 
 app.locals.amount = 0
 let event_List = []
 
-
+// Create the parser
+const parser = parse({
+	delimiter: ','
+})
+// Use the readable stream api
+parser.on('readable', function () {
+	let record
+	while (record = parser.read()) {
+		output.push(record)
+	}
+})
+// Catch any error
+parser.on('error', function (err) {
+	console.error(err.message)
+})
 
 app.use(flash());
 app.use(passport.initialize());
@@ -134,13 +146,18 @@ passport.use('local-login', new passportLocal({
 				console.log("In here")
 				app.locals.council = user.council;
 			}
+			console.log(JSON.stringify(user))
+			if (user.pending_amount) {
+				console.log(user.pending_amount)
+				app.locals.amount = user.pending_amount;
+			}
 			if (user.admin) {
 				app.locals.admin = user.admin;
 			}
 			app.locals.username = username
 			return done(null, user);
 		});
-
+		//
 	}));
 passport.serializeUser(function (user, done) {
 	done(null, user.id);
@@ -157,61 +174,9 @@ app.use(function (req, res, next) {
 	next();
 });
 
-// app.use(cors());
-// app.get("/points", function (req, res) {
-// 	User.find({}, function (err, foundUsers) {
-// 		if (!err) {
-// 			// console.log(foundUsers)
-// 			for (j = 0; j < foundUsers.length; j++) {
-// 				for (i = 0; i < classes.length; i++) {
-// 					if (foundUsers[j].class) {
-// 						// console.log(foundUsers)
-// 						if (foundUsers[j].points)
-// 							classes[foundUsers[j].class] += foundUsers[j].points
-// 					}
-// 				}
-// 			}
-// 			// console.log(foundUsers)
-// 			res.render("points", { classes: classes })
-// 		}
-// 		else {
-// 			console.log(err);
-// 			req.flash("error", "Please try again after some time ");
-// 			res.redirect("/");
-// 		}
-
-// 	});
-// })
-
-
-app.get("/councils", function (req, res) {
-	res.render("councils")
-})
-event_list = []
-app.get("/events/:id", function (req, res) {
-	event_list = []
-	thisevent = null;
-	Event.findById(req.params.id, (err, foundEvent) => {
-		if (err) {
-			console.log(err);
-			req.flash("error", "Please try again after some time");
-			return res.redirect("back");
-		} else {
-			console.log(foundEvent.user.username[0]);
-			console.log(foundEvent.user.username[1]);
-			thisevent = foundEvent;
-			event_list.push({ username: foundEvent.user.username, points: foundEvent.user.points })
-			console.log(JSON.stringify(event_list))
-			res.render("event_points", { event: thisevent, event_list: event_list })
-		}
-	}
-	);
-});
-
 app.get("/add_bill", function (req, res) {
 	// res.send("HElp")
-	// Event.find({}, function(a,b){console.log(b)})
-	Event.find({}, function (err, stories) {
+	Bill.find({}, function (err, stories) {
 		if (!err) {
 			console.log(stories)
 			res.render("add_bill", { stories: stories });
@@ -221,39 +186,97 @@ app.get("/add_bill", function (req, res) {
 			req.flash("error", "Please try again after some time ");
 			res.redirect("/");
 		}
-		
+
 	});
 })
 app.post("/add_bill", function (req, res) {
-	console.log("Reached here")
 	billDetails = req.body
 	console.log(billDetails)
 	var newBill = new Bill()
 	newBill.purpose = billDetails.purpose
 	newBill.amount = billDetails.amount
 	newBill.members = billDetails.billItemList
+	newBill.settled = false
 	newBill.save(function (err) {
 		if (err) {
 			console.log("Error in saving new user")
-			res.send(err);
+			res.end(err);
 		}
 		console.log("Registered new User")
-		res.redirect("/")
 	})
 	len = 0
 	if (billDetails.billItemList && billDetails.billItemList.length)
 		len = billDetails.billItemList.length
-	userAmount = billDetails.amount/(len+1)
+	userAmount = billDetails.amount / (len + 1)
 	app.locals.amount = userAmount
+	if (!billDetails.billItemList)
+		members = []
+	members = billDetails.billItemList
+	members.push(app.locals.username)
+	for (j = 0; j < members.length; j++) {
+		console.log(members)
+
+		// User.findOneAndUpdate({username:members[i]}, {$set:{amount_pending:newBill.amount}}, function(err, doc){
+		// 	console.log("Here")
+		// 	if (err) return res.send(500, { error: err });
+		// });
+		User.findOne({ username: members[j] }, function (err, user) {
+			console.log("Found" + JSON.stringify(user))
+			if (user) {
+				user.amount_pending = newBill.amount;
+				user.save(function (err) {
+					if (err) {
+						console.error('Not saved amount to db!');
+					}
+				});
+			}
+		});
+	}
+	return res.redirect("/");
 })
 
+app.get("/upload_bill_csv", function (req, res) {
+	res.render("csv_upload")
+})
+
+app.post("/upload_bill_csv", function (req, res) {
+	var form = new formidable.IncomingForm();
+	let fp;
+	form.parse(req, function (err, fields, files) {
+		// oldpath : temporary folder to which file is saved to
+		fp = fs.readFileSync(files.filetoupload.path, 'utf8', function (err, data) {
+			console.log(err);
+		});
+		fp = fp.split("\n")
+		// console.log(fp)
+		for (i = 0; i < fp.length; i++) {
+			fp[i] = fp[i].split(",")
+
+			var newBill = new Bill();
+			newBill.members = [fp[i][0]];
+			newBill.purpose = fp[i][1];
+			newBill.amount = fp[i][2]
+			// save the user
+			newBill.save(function (err) {
+				if (err) {
+					console.log("Error in saving from file")
+					throw err;
+				}
+				console.log("Registered one Bill")
+				// return done(null, newUser, req.flash("sucess", "You have been registered sucessfully"));
+			});
+		}
+		console.log(fp)
+	}
+	)
+	res.redirect("/review")
+
+})
 app.get("/login", function (req, res) {
-	// res.send("HElp")
 	res.render("login")
 })
 
 app.get("/signup", function (req, res) {
-	// res.send("HElp")
 	res.render("signup")
 })
 
@@ -264,7 +287,10 @@ app.get("/event_details", function (req, res) {
 
 
 app.get("/review", function (req, res) {
-	res.render("review")
+	Bill.find({}, function (err, billList) {
+		console.log(JSON.stringify(billList))
+		res.render("review", { billList: billList })
+	})
 })
 
 
@@ -287,7 +313,7 @@ app.get("/logout", function (req, res) {
 	app.locals.username = null;
 	app.locals.admin = null;
 	app.locals.council = null;
-
+	app.locals.amount = 0;
 	res.redirect("/");
 });
 
@@ -305,86 +331,3 @@ app.listen(3000, function () {
 
 module.exports = app;
 
-
-class user {
-
-	constructor(name, age, categories) {
-		this.name = name;
-		this.age = age;
-		this.categories = []
-		this.categories = categories;
-		this.events = [];
-	}
-
-	add_users(events) {
-		this.events = events;
-	}
-}
-
-class event {
-
-	constructor(name, details, categories) {
-		this.name = name;
-		this.details = details;
-		this.categories = []
-		this.categories = categories;
-	}
-}
-
-function common_elements(arrs) {
-	var resArr = [];
-	for (var i = arrs[0].length - 1; i > 0; i--) {
-		for (var j = arrs.length - 1; j > 0; j--) {
-			if (arrs[j].indexOf(arrs[0][i]) == -1) {
-				break;
-			}
-		}
-		if (j === 0) {
-			resArr.push(arrs[0][i]);
-		}
-	}
-	return resArr;
-}
-
-function sortProperties(obj) {
-	// convert object into array
-	var sortable = [];
-	for (var key in obj)
-		if (obj.hasOwnProperty(key))
-			sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-
-	// sort items by value
-	sortable.sort(function (a, b) {
-		var x = a[1],
-			y = b[1];
-		return x > y ? -1 : x < y ? 1 : 0;
-	});
-	return sortable; // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
-}
-
-var recommend_items = {};
-
-for (var i = 0, size = event_List.length; i < size; i++) {
-	var event_num = event_List[i];
-	var user_cat = user1.categories
-	//console.log(user.categories )
-	var x = user_cat.length; //only change this accordingly this is
-	var y = event_num.categories.length;
-	var total = x + y;
-	var arrays = [user1.categories, event_num.categories];
-	var sim = common_elements(arrays);
-	var sim_elements = sim.length;
-	total = total - sim_elements;
-	var corelation = sim_elements / total;
-
-	recommend_items[event_num.name] = corelation;
-	console.log(event_num.name + ": " + corelation);
-}
-
-var sorted_recommend = sortProperties(recommend_items)
-for (var key in sorted_recommend) {
-	// check if the property/key is defined in the object itself, not in parent
-	if (sorted_recommend.hasOwnProperty(key)) {
-		console.log(key, sorted_recommend[key]);
-	}
-}

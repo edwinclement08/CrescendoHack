@@ -11,15 +11,20 @@
     "connect-flash-plus": "^0.2.1",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
+    "csv": "^5.1.1",
+    "csv-parse": "^4.4.1",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "^4.16.3",
+    "express-fileupload": "^1.1.4",
     "express-session": "^1.15.6",
     "formidable": "^1.2.1",
+    "fs": "0.0.1-security",
     "http-errors": "~1.6.2",
     "method-override": "^3.0.0",
     "mongoose": "^5.4.19",
     "mongoose-paginate": "^5.0.3",
+    "multer": "^1.4.1",
     "nodemon": "^1.17.2",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
@@ -28,14 +33,6 @@
   "description": "",
   "main": "app.js",
   "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/joshua-noronha13/CrescendoHack.git"
-  },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/joshua-noronha13/CrescendoHack/issues"
-  },
-  "homepage": "https://github.com/joshua-noronha13/CrescendoHack#readme"
 }

@@ -5,10 +5,12 @@ var bill = new mongoose.Schema({
     purpose: String,
     amount: Number,
     members: Array,
-    event: [
+    setelled: Boolean,
+    poster: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
+            username: String
         }
     ]
 });
